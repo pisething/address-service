@@ -12,6 +12,6 @@ public interface AdminAreaService {
 	Mono<AdminAreaResponse> create(AdminAreaCreateRequest dto);
 	Mono<AdminAreaResponse> get(String code);
 	Mono<Void> delete(String code);
-	Mono<AdminAreaResponse> update(AdminAreaUpdateRequest dto);
+	Mono<AdminAreaResponse> update(String code, AdminAreaUpdateRequest dto);
 	Flux<AdminAreaResponse> list(AdminLevel level, String parentCode);
 }

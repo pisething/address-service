@@ -9,7 +9,7 @@ import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface AdminAreaRepsitory extends ReactiveMongoRepository<AdminArea, String>{
+public interface AdminAreaRepository extends ReactiveMongoRepository<AdminArea, String>{
 	
 	Flux<AdminArea> findByLevel(AdminLevel level, Sort sort);
 	

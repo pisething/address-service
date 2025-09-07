@@ -6,13 +6,19 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValueCheckStrategy;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 import com.piseth.java.school.addressservice.domain.AdminArea;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", 
+	unmappedTargetPolicy = ReportingPolicy.IGNORE, // don’t complain about fields we don’t map
+	nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+	nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE) // skip nulls on update)
 public interface AdminAreaMapper {
 	
 	@Mapping(target = "path", expression = "java(buildPath(dto.getCode()))")
@@ -42,13 +48,6 @@ public interface AdminAreaMapper {
 	
 	AdminAreaResponse toResponse(AdminArea entity);
 	
-	@Mapping(target = "createAt", ignore = true)
-	@Mapping(target = "updateAt", ignore = true)
-	@Mapping(target = "version", ignore = true)
-	@Mapping(target = "level", ignore = true)
-	@Mapping(target = "code", ignore = true)
-	@Mapping(target = "parentCode", ignore = true)
-	@Mapping(target = "path", ignore = true)
 	void update(@MappingTarget AdminArea target, AdminAreaUpdateRequest dto);
 
 }
