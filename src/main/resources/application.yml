@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: address-service		
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: address
+      username: root
+      password: root
+      authentication-database: admin				
+logging:
+  level:
+    root: INFO
+    com.piseth.java.school: DEBUG		
