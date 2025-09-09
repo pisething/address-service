@@ -1,4 +1,3 @@
-// src/main/java/com/piseth/java/school/addressservice/web/AdminAreaUploadController.java
 package com.piseth.java.school.addressservice.controller;
 
 import org.springframework.http.HttpStatus;

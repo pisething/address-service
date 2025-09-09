@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.piseth.java.school.addressservice.domain.AdminArea;
 import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
+import com.piseth.java.school.addressservice.exception.ValidationException;
 
 @Component
 public class AdminAreaValidator {
@@ -17,15 +18,15 @@ public class AdminAreaValidator {
     public void validate(final AdminArea request) {
 
         if (Objects.isNull(request)) {
-            throw new IllegalArgumentException("request is required");
+            throw new ValidationException("request is required");
         }
 
         if (Objects.isNull(request.getLevel())) {
-            throw new IllegalArgumentException("level is required");
+            throw new ValidationException("level is required");
         }
 
         if (Objects.isNull(request.getCode()) || request.getCode().isBlank()) {
-            throw new IllegalArgumentException("code is required");
+            throw new ValidationException("code is required");
         }
 
         final String code = request.getCode().trim();

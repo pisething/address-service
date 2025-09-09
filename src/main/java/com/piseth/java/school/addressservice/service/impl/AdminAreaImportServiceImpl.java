@@ -36,7 +36,9 @@ public class AdminAreaImportServiceImpl implements AdminAreaImportService {
 
 	@Override
 	public Mono<UploadSummary> importExcel(final FilePart file, final boolean dryRun) {
-		return parser.parse(file).sort(ParsedRow.BY_DEPTH).concatMap(row -> handleRow(row, dryRun))
+		return parser.parse(file)
+				.sort(ParsedRow.BY_DEPTH)
+				.concatMap(row -> handleRow(row, dryRun))
 				.reduce(new ImportAccumulator(), ImportAccumulator::accumulate)
 				.map(acc -> acc.toSummary(importMapper));
 	}

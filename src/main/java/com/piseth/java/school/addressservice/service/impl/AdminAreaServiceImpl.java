@@ -10,6 +10,8 @@ import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
+import com.piseth.java.school.addressservice.exception.DuplicateAdminAreaException;
+import com.piseth.java.school.addressservice.exception.ParentNotFoundException;
 import com.piseth.java.school.addressservice.mapper.AdminAreaMapper;
 import com.piseth.java.school.addressservice.repository.AdminAreaRepository;
 import com.piseth.java.school.addressservice.service.AdminAreaService;
@@ -56,7 +58,7 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 				if(exists) {
 					return Mono.empty();
 				}else {
-					return Mono.error(new IllegalStateException("Parent not found : " + candidate.getParentCode()));
+					return Mono.error(new ParentNotFoundException(candidate.getParentCode()));
 				}
 			});
 		
@@ -67,7 +69,7 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 		return repository.existsById(candidate.getCode())
 		.flatMap(exists ->{
 			if(exists) {
-				return Mono.error(new IllegalStateException("AdminArea already exists : " + candidate.getCode()));
+				return Mono.error(new DuplicateAdminAreaException(candidate.getCode()));
 			}else {
 				return Mono.empty();
 			}
