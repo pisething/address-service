@@ -1,4 +1,3 @@
-// src/main/java/com/piseth/java/school/addressservice/web/upload/AdminAreaImportMapper.java
 package com.piseth.java.school.addressservice.mapper;
 
 import java.util.List;

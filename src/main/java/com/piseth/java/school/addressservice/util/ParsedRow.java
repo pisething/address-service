@@ -1,9 +1,8 @@
-// src/main/java/com/piseth/java/school/addressservice/web/upload/ParsedRow.java
-package com.piseth.java.school.addressservice.web.upload;
-
-import java.util.Comparator;
+package com.piseth.java.school.addressservice.util;
 
 import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
+
+import java.util.Comparator;
 
 public record ParsedRow(
     int lineNumber,
@@ -20,6 +19,6 @@ public record ParsedRow(
             return code.split("-").length;
         }
     }
-    
+
     public static final Comparator<ParsedRow> BY_DEPTH = Comparator.comparingInt(ParsedRow::depth);
 }
