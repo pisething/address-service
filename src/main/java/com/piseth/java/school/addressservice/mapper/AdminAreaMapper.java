@@ -28,23 +28,32 @@ public interface AdminAreaMapper {
 	AdminArea toEntity(AdminAreaCreateRequest dto);
 	
 	
-	default List<String> buildPath(String code){
-		if( code == null || code.isBlank()) {
-			return List.of();
-		}
-		String[] parts = code.split("-");
-		List<String> path = new ArrayList<>(parts.length);
-		String acc = "";
-		for(int i = 0; i < parts.length; i++) {
-			if(i == 0) {
-				acc = parts[i];
-			}else {
-				acc = acc + "-" + parts[i];
-			}
-			path.add(acc);
-		}
-		return path;
-	}
+	/**
+     * Build cumulative dashless path segments every 2 digits.
+     * 12           -> [12]
+     * 1201         -> [12, 1201]
+     * 120101       -> [12, 1201, 120101]
+     * 12010101     -> [12, 1201, 120101, 12010101]
+     */
+    default List<String> buildPath(final String code) {
+        if (code == null || code.isBlank()) {
+            return List.of();
+        }
+        final String trimmed = code.trim();
+        final int len = trimmed.length();
+
+        // defensively accept only even lengths up to 8
+        if ((len % 2) != 0 || len > 8) {
+            return List.of(trimmed); // fallback: at least include the code itself
+        }
+
+        final List<String> path = new ArrayList<>(len / 2);
+        for (int i = 2; i <= len; i += 2) {
+            path.add(trimmed.substring(0, i));
+        }
+        return path;
+    }
+
 	
 	AdminAreaResponse toResponse(AdminArea entity);
 	
