@@ -10,6 +10,8 @@ import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
+import com.piseth.java.school.addressservice.exception.AdminAreaNotFoundException;
+import com.piseth.java.school.addressservice.exception.ChildrenExistException;
 import com.piseth.java.school.addressservice.exception.DuplicateAdminAreaException;
 import com.piseth.java.school.addressservice.exception.ParentNotFoundException;
 import com.piseth.java.school.addressservice.mapper.AdminAreaMapper;
@@ -83,45 +85,50 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 
 	@Override
 	public Mono<AdminAreaResponse> get(final String code) {
-		return repository.findById(code).switchIfEmpty(Mono.error(new IllegalStateException("AdminArea not found: " + code)))
+		return repository.findById(code).switchIfEmpty(Mono.error(new AdminAreaNotFoundException(code)))
 				.map(mapper::toResponse);
 	}
 
 	@Override
 	public Flux<AdminAreaResponse> list(final AdminLevel level, final String parentCode) {
-		if (level == null && (parentCode == null || parentCode.isBlank())) {
-			// whole collection with sort
-			return repository.findAll(DEFAULT_SORT).map(mapper::toResponse);
-		}
-		if (level != null && (parentCode == null || parentCode.isBlank())) {
-			return repository.findByLevel(level, DEFAULT_SORT).map(mapper::toResponse);
-		}
-		if (level == null) {
-			return repository.findByParentCode(parentCode, DEFAULT_SORT).map(mapper::toResponse);
-		}
-		return repository.findByLevelAndParentCode(level, parentCode, DEFAULT_SORT).map(mapper::toResponse);
+	    final boolean hasLevel = (level != null);
+	    final boolean hasParent = org.springframework.util.StringUtils.hasText(parentCode);
+
+	    if (hasLevel && hasParent) {
+	        return repository.findByLevelAndParentCode(level, parentCode, DEFAULT_SORT)
+	                .map(mapper::toResponse);
+	    }
+
+	    if (hasLevel) {
+	        return repository.findByLevel(level, DEFAULT_SORT).map(mapper::toResponse);
+	    }
+
+	    if (hasParent) {
+	        return repository.findByParentCode(parentCode, DEFAULT_SORT).map(mapper::toResponse);
+	    }
+
+	    // neither level nor parentCode
+	    return repository.findAll(DEFAULT_SORT).map(mapper::toResponse);
 	}
 
 	@Override
 	public Mono<Void> delete(final String code) {
-	    return repository.existsById(code)
-	        .flatMap(exists -> {
-	            if (!exists) {
-	                return Mono.error(new IllegalStateException("AdminArea not found: " + code));
-	            }
-	            return repository.existsByParentCode(code)
-	                .flatMap(hasChildren -> hasChildren
-	                    ? Mono.error(new IllegalStateException("Cannot delete: children exist for " + code))
-	                    : repository.deleteById(code));
-	        });
+		return repository.existsById(code)
+			    .flatMap(exists -> {
+			        if (!exists) {
+			            return Mono.error(new AdminAreaNotFoundException(code));
+			        }
+			        return repository.existsByParentCode(code)
+			            .flatMap(hasChildren -> hasChildren
+			                ? Mono.error(new ChildrenExistException(code))
+			                : repository.deleteById(code));
+			    });
 	}
-
-
 
 	@Override
 	public Mono<AdminAreaResponse> update(final String code, final AdminAreaUpdateRequest req) {
 		final Instant now = Instant.now();
-		return repository.findById(code).switchIfEmpty(Mono.error(new IllegalStateException("AdminArea not found: " + code)))
+		return repository.findById(code).switchIfEmpty(Mono.error(new AdminAreaNotFoundException(code)))
 				.flatMap(entity -> {
 					mapper.update(entity, req); // set names
 					//entity.setUpdatedAt(now); // auditing can replace this
