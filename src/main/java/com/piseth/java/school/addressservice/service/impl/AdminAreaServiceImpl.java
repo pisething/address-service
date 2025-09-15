@@ -1,12 +1,20 @@
 package com.piseth.java.school.addressservice.service.impl;
 
+import java.util.Objects;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.piseth.java.school.addressservice.domain.AdminArea;
 import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
+import com.piseth.java.school.addressservice.exception.AdminAreaNotFoundException;
+import com.piseth.java.school.addressservice.exception.ChildrenExistException;
+import com.piseth.java.school.addressservice.exception.DuplicateAdminAreaException;
+import com.piseth.java.school.addressservice.exception.ParentNotFoundException;
 import com.piseth.java.school.addressservice.mapper.AdminAreaMapper;
 import com.piseth.java.school.addressservice.repository.AdminAreaRepsitory;
 import com.piseth.java.school.addressservice.service.AdminAreaService;
@@ -23,6 +31,8 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 	private final AdminAreaRepsitory repository;
 	private final AdminAreaValidator validator;
 	private final AdminAreaMapper mapper;
+	
+	private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.ASC, "code");
 
 	/*
 	 map from dto to entity
@@ -64,7 +74,7 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 				if(exists) {
 					return Mono.empty();
 				}else {
-					return Mono.error(new IllegalArgumentException("Parent not found : " + candidate.getParentCode()));
+					return Mono.error(new ParentNotFoundException(candidate.getParentCode()));
 				}
 			});
 		
@@ -75,7 +85,7 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 		return repository.existsById(candidate.getCode())
 		.flatMap(exists ->{
 			if(exists) {
-				return Mono.error(new IllegalArgumentException("AdminArea already exists: : " + candidate.getCode()));
+				return Mono.error(new DuplicateAdminAreaException(candidate.getCode()));
 			}else {
 				return Mono.empty();
 			}
@@ -89,26 +99,63 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 
 	@Override
 	public Mono<AdminAreaResponse> get(String code) {
-		// TODO Auto-generated method stub
-		return null;
+		return repository.findById(code)
+				.switchIfEmpty(Mono.error(new AdminAreaNotFoundException(code)))
+				.map(mapper::toResponse);
 	}
 
+	// delete :
+	//1. exist
+	//2. no children
 	@Override
 	public Mono<Void> delete(String code) {
-		// TODO Auto-generated method stub
-		return null;
+		return repository.existsById(code)
+			.flatMap(exists ->{
+				if(!exists) {
+					return Mono.error(new AdminAreaNotFoundException(code));
+				}
+				return repository.existsByParentCode(code)
+					.flatMap(hasChildren ->{
+						if(hasChildren) {
+							return Mono.error(new ChildrenExistException(code));
+						}
+						return repository.deleteById(code);
+					});
+			});
+			
 	}
 
 	@Override
-	public Mono<AdminAreaResponse> update(AdminAreaUpdateRequest dto) {
-		// TODO Auto-generated method stub
-		return null;
+	public Mono<AdminAreaResponse> update(String code, AdminAreaUpdateRequest dto) {
+		return repository.findById(code)
+			.switchIfEmpty(Mono.error(new AdminAreaNotFoundException(code)))
+			.flatMap(entity ->{
+				mapper.update(entity, dto);
+				return repository.save(entity);
+			})
+			.map(mapper::toResponse);
 	}
 
 	@Override
 	public Flux<AdminAreaResponse> list(AdminLevel level, String parentCode) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		final boolean hasLevel = Objects.nonNull(level);
+		final boolean hasParent = StringUtils.hasText(parentCode);
+		
+		if(hasLevel && hasParent) {
+			return repository.findByLevelAndParentCode(level, parentCode, DEFAULT_SORT)
+					.map(mapper::toResponse);
+		}
+		
+		if(hasLevel) {
+			return repository.findByLevel(level, DEFAULT_SORT).map(mapper::toResponse);
+		}
+		
+		if(hasParent) {
+			return repository.findByParentCode(parentCode, DEFAULT_SORT).map(mapper::toResponse);
+		}
+		
+		return repository.findAll(DEFAULT_SORT).map(mapper::toResponse);
 	}
 
 }
