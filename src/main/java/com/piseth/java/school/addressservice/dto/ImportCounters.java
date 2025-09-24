@@ -1,4 +1,3 @@
-// src/main/java/com/piseth/java/school/addressservice/web/upload/ImportCounters.java
 package com.piseth.java.school.addressservice.dto;
 
 public record ImportCounters(

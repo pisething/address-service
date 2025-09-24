@@ -1,4 +1,3 @@
-// src/test/java/com/piseth/java/school/addressservice/service/impl/AdminAreaServiceImplTest.java
 package com.piseth.java.school.addressservice.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +32,6 @@ import com.piseth.java.school.addressservice.exception.DuplicateAdminAreaExcepti
 import com.piseth.java.school.addressservice.exception.ParentNotFoundException;
 import com.piseth.java.school.addressservice.mapper.AdminAreaMapper;
 import com.piseth.java.school.addressservice.repository.AdminAreaRepository;
-import com.piseth.java.school.addressservice.service.impl.AdminAreaServiceImpl;
 import com.piseth.java.school.addressservice.validator.AdminAreaValidator;
 
 import reactor.core.publisher.Flux;
@@ -387,11 +385,8 @@ class AdminAreaServiceImplTest {
             when(repo.findById(code)).thenReturn(Mono.empty());
 
             StepVerifier.create(service.update(code, new AdminAreaUpdateRequest("a", "b")))
-                .expectErrorSatisfies(err -> {
-                    // keep IllegalStateException until service.update() is migrated
-                    Assertions.assertTrue(err instanceof IllegalStateException);
-                    Assertions.assertTrue(err.getMessage().contains("not found"));
-                }).verify();
+            .expectError(AdminAreaNotFoundException.class)
+            .verify();
 
             verify(repo).findById(code);
             verify(repo, never()).save(any());
