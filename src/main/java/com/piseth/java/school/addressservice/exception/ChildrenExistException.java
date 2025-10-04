@@ -1,5 +1,7 @@
 package com.piseth.java.school.addressservice.exception;
 
+import com.piseth.java.school.addressservice.domain.enumeration.Outcome;
+
 public class ChildrenExistException extends AdminAreaException {
-    public ChildrenExistException(String code) { super("Cannot delete: children exist for " + code); }
+    public ChildrenExistException(String code) { super(Outcome.VALIDATION, "Cannot delete: children exist for " + code); }
 }

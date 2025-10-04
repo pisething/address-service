@@ -43,28 +43,31 @@ public class AdminAreaImportServiceImpl implements AdminAreaImportService {
 				.map(acc -> acc.toSummary(importMapper));
 	}
 
-	private reactor.core.publisher.Mono<RowResult> handleRow(final ParsedRow row, final boolean dryRun) {
+	private Mono<RowResult> handleRow(final ParsedRow row, final boolean dryRun) {
 		final AdminAreaCreateRequest req = parsedRowMapper.toCreateRequest(row);
 
-		return validate(req).then(maybeCreate(req, dryRun)).map(ok -> RowResult.inserted()).onErrorResume(ex -> {
+		return validate(req)
+		    .then(maybeCreate(req, dryRun))
+		    .map(ok -> RowResult.inserted())
+		    .onErrorResume(ex -> {
 			final String msg = errorClassifier.safeMessage(ex);
-			final Outcome outcome = errorClassifier.classify(msg);
+			final Outcome outcome = errorClassifier.classify(ex);
 			final RowError err = new RowError(row.lineNumber(), row.code(), msg);
-			return reactor.core.publisher.Mono.just(RowResult.error(outcome, err));
+			return Mono.just(RowResult.error(outcome, err));
 		});
 	}
 
-	private reactor.core.publisher.Mono<Void> validate(final AdminAreaCreateRequest req) {
-		return reactor.core.publisher.Mono.fromRunnable(() -> {
+	private Mono<Void> validate(final AdminAreaCreateRequest req) {
+		return Mono.fromRunnable(() -> {
 			// validator expects an entity — use MapStruct to map the DTO
 			var entity = adminAreaMapper.toEntity(req);
 			validator.validate(entity);
 		});
 	}
 
-	private reactor.core.publisher.Mono<Boolean> maybeCreate(final AdminAreaCreateRequest req, final boolean dryRun) {
+	private Mono<Boolean> maybeCreate(final AdminAreaCreateRequest req, final boolean dryRun) {
 		if (dryRun) {
-			return reactor.core.publisher.Mono.just(Boolean.TRUE);
+			return Mono.just(Boolean.TRUE);
 		} else {
 			return adminAreaService.create(req).thenReturn(Boolean.TRUE);
 		}
