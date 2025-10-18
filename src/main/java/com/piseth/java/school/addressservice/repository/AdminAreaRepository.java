@@ -23,19 +23,19 @@ public interface AdminAreaRepository extends ReactiveMongoRepository<AdminArea, 
 	
 	// Only return required fields
     @Query(value = "{ 'level': ?0 }",
-           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 0 }")
+           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 1 }")
     Flux<AdminArea> findSlimByLevel(AdminLevel level, Sort sort);
 
     @Query(value = "{ 'parentCode': ?0 }",
-           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 0 }")
+           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 1 }")
     Flux<AdminArea> findSlimByParentCode(String parentCode, Sort sort);
 
     @Query(value = "{ 'level': ?0, 'parentCode': ?1 }",
-           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 0 }")
+           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 1 }")
     Flux<AdminArea> findSlimByLevelAndParentCode(AdminLevel level, String parentCode, Sort sort);
 
     @Query(value = "{}",
-           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 0 }")
+           fields = "{ 'code': 1, 'level': 1, 'parentCode': 1, 'nameKh': 1, 'nameEn': 1, '_id': 1 }")
     Flux<AdminArea> findSlimAll(Sort sort);
 
 }
