@@ -2,17 +2,16 @@ package com.piseth.java.school.addressservice.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-
 import com.piseth.java.school.addressservice.domain.AdminArea;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
+import com.piseth.java.school.addressservice.dto.AdminAreaSlimResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
 
 @Mapper(componentModel = "spring", 
@@ -58,5 +57,7 @@ public interface AdminAreaMapper {
 	AdminAreaResponse toResponse(AdminArea entity);
 	
 	void update(@MappingTarget AdminArea target, AdminAreaUpdateRequest dto);
+	
+	AdminAreaSlimResponse toSlimResponse(AdminArea entity);
 
 }

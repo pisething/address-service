@@ -1,14 +1,14 @@
 package com.piseth.java.school.addressservice.service.impl;
 
 import java.time.Instant;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
+import org.springframework.util.StringUtils;
 import com.piseth.java.school.addressservice.domain.AdminArea;
 import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
+import com.piseth.java.school.addressservice.dto.AdminAreaSlimResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
 import com.piseth.java.school.addressservice.exception.AdminAreaNotFoundException;
 import com.piseth.java.school.addressservice.exception.ChildrenExistException;
@@ -18,7 +18,6 @@ import com.piseth.java.school.addressservice.mapper.AdminAreaMapper;
 import com.piseth.java.school.addressservice.repository.AdminAreaRepository;
 import com.piseth.java.school.addressservice.service.AdminAreaService;
 import com.piseth.java.school.addressservice.validator.AdminAreaValidator;
-
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -135,6 +134,31 @@ public class AdminAreaServiceImpl implements AdminAreaService{
 					return repository.save(entity);
 				}).map(mapper::toResponse);
 	}
+	
+	@Override
+	public Flux<AdminAreaSlimResponse> listSlim(final AdminLevel level, final String parentCode) {
+	  final boolean hasLevel = (level != null);
+	    final boolean hasParent = StringUtils.hasText(parentCode);
+
+	    if (hasLevel && hasParent) {
+	        return repository.findSlimByLevelAndParentCode(level, parentCode, DEFAULT_SORT)
+	                .map(mapper::toSlimResponse);
+	    }
+
+	    if (hasLevel) {
+	        return repository.findSlimByLevel(level, DEFAULT_SORT)
+	                .map(mapper::toSlimResponse);
+	    }
+
+	    if (hasParent) {
+	        return repository.findSlimByParentCode(parentCode, DEFAULT_SORT)
+	                .map(mapper::toSlimResponse);
+	    }
+
+	    return repository.findSlimAll(DEFAULT_SORT)
+	            .map(mapper::toSlimResponse);
+	}
+
 
 
 	

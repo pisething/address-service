@@ -11,13 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
+import com.piseth.java.school.addressservice.dto.AdminAreaSlimResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
 import com.piseth.java.school.addressservice.service.AdminAreaService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -58,4 +57,12 @@ public class AdminAreaController {
 	public Mono<AdminAreaResponse> update(@PathVariable String code, @Valid @RequestBody AdminAreaUpdateRequest req) {
 		return service.update(code, req);
 	}
+	
+	@GetMapping("/slim")
+    public Flux<AdminAreaSlimResponse> listSlim(
+            @RequestParam(required = false) final AdminLevel level,
+            @RequestParam(required = false) final String parentCode) {
+
+            return service.listSlim(level, parentCode);
+    }
 }
