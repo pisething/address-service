@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.piseth.java.school.addressservice.domain.enumeration.AdminLevel;
 import com.piseth.java.school.addressservice.dto.AdminAreaCreateRequest;
 import com.piseth.java.school.addressservice.dto.AdminAreaResponse;
+import com.piseth.java.school.addressservice.dto.AdminAreaSlimResponse;
 import com.piseth.java.school.addressservice.dto.AdminAreaUpdateRequest;
 import com.piseth.java.school.addressservice.service.AdminAreaService;
 
@@ -48,6 +49,15 @@ public class AdminAreaController {
 			
 			){
 		return service.list(level, parentCode);
+	}
+	
+	@GetMapping("/slim")
+	public Flux<AdminAreaSlimResponse> listSlim(
+			@RequestParam(required = false) AdminLevel level,
+			@RequestParam(required = false) String parentCode
+			
+			){
+		return service.listSlim(level, parentCode);
 	}
 	
 	@DeleteMapping("/{code}")
